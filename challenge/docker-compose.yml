@@ -1,0 +1,19 @@
+services:
+  linux-ctf:
+    build: .
+    container_name: linux_ctf
+    ports:
+      - "4444:4444"
+
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 100          # blocks fork bombs
+
+    cap_drop:
+      - ALL
+    cap_add:
+      - DAC_OVERRIDE
+      - SETUID
+      - SETGID
+
+    restart: unless-stopped
