@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    ports:
+      - "8777:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DB_HOST=db
+      - DB_USER=ctfuser
+      - DB_PASS=ctfpass
+      - DB_NAME=ctfdb
+    # Security Hardening
+    read_only: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid
+      - /var/run/apache2:rw,noexec,nosuid
+      - /var/lock/apache2:rw,noexec,nosuid
+      - /var/log/apache2:rw,noexec,nosuid
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    networks:
+      - ctf_internal
+
+  db:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpass
+      - MYSQL_DATABASE=ctfdb
+      - MYSQL_USER=ctfuser
+      - MYSQL_PASSWORD=ctfpass
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    cap_drop:
+      - ALL
+    cap_add:
+      - CHOWN
+      - SETGID
+      - SETUID
+      - DAC_OVERRIDE
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+    networks:
+      - ctf_internal
+
+networks:
+  ctf_internal:
+    driver: bridge

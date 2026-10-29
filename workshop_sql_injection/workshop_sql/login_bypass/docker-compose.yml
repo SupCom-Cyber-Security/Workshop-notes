@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  sqli-challenge:
+    build: .
+    container_name: sqli_loginbypass
+    restart: always
+    ports:
+      - "8888:5000"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:exec,mode=1777
+      - /data:mode=0777
+    pids_limit: 100
+    mem_limit: 512m

@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  sqli-union-challenge:
+    build: .
+    container_name: sqli_union_challenge
+    restart: unless-stopped
+    read_only: true
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:exec,mode=1777,size=64M
+    ports:
+      - "127.0.0.1:5550:5000"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 256M
+    networks:
+      - ctf_internal_net
+
+networks:
+  ctf_internal_net:
+    driver: bridge
